@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Helvetica, Arial, sans-serif;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .video-container {
+            position: absolute;
+            top: -5%;
+            left: -5%;
+            width: 110vw;
+            height: 110vh;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Prevent clicks on the iframe */
+        }
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0); /* Transparent overlay */
+            z-index: 2;
+        }
+        .navbar {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-size: 0.6em;
+            z-index: 10;
+            padding: 0;
+            filter: blur(0.2px);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 300;
+            filter: blur(0.2px);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+        .links {
+            display: flex;
+            gap: 10px;
+        }
+        .datetime {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 0.6em;
+            z-index: 10;
+            filter: blur(0.2px);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        .middle-text, .contact-text, .time-date-text {
+            display: none;
+            position: fixed;
+            top: calc(50% + 50px); 
+            left: 5px; /* Margin from the left edge */
+            right: 5px; /* Margin from the right edge */
+            color: white;
+            font-size: 30px;
+            z-index: 20;
+            text-align: justify;
+            filter: blur(0.2px);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            width: calc(100% - 10px); /* Full width minus margins */
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .contact-text {
+            top: calc(50% + 50px); /* Move the contact text 50px down from its original position */
+        }
+        .time-date-text {
+            top: calc(50% - 70px); /* Adjust the position of the time-date-text */
+            font-size: 50px;
+            text-align: center;
+        }
+        .links a#about:hover + .middle-text {
+            display: block;
+            animation: fadeIn 1s forwards;
+        }
+        .links a#contact:hover + .contact-text {
+            display: block;
+            animation: fadeIn 1s forwards;
+        }
+        .links:hover .contact-text {
+            animation: fadeOut 1s forwards;
+            opacity: 0;
+        }
+        .datetime.active + .time-date-text {
+            display: block;
+            animation: fadeIn 1s forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="datetime" id="datetime">Click for Time and Date</div>
+    <div class="navbar">
+        <a href="https://instagram.com/andykim_andykim" target="_blank">@andykim_andykim</a>
+        <div class="links">
+            <a href="#">Work</a>
+            <a id="about" href="#">About</a>
+            <div class="middle-text">
+                Andy Kim, an architect and educator in NYC, focuses on creating buildings and artifacts that explore the relationships within architecture, cities, and urban ecology. His work have been exhibited at the A83 Gallery, AIA Javits Expo, Current Objects and his texts have been published on Pidgin. Andy received a Post Professional Master of Architecture from Princeton University Graduate School of Architecture and Bachelor of Architecture from Pratt Institute. And worked in the offices of MOS, Hume Coover Studio, Op-al and Grimshaw Architects. Andy teaches at Syracuse University School of Architecture.
+            </div>
+            <a id="contact" href="#">Contact</a>
+            <div class="contact-text">
+                For project and consignment inquiries please email me at <a href="mailto:yeonkyu9494@gmail.com">yeonkyu9494@gmail.com</a> or call me at <a href="tel:+19294099254">+1(US) 929 409 9254</a>.
+            </div>
+        </div>
+    </div>
+    <div class="time-date-text" id="time-date-text"></div>
+    <div class="video-container">
+        <!-- Updated Facebook Live embed code -->
+        <iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Fandy.kim.737001%2Fvideos%2F1055948162558613%2F&width=1920" 
+                width="1920" 
+                height="1080" 
+                style="border:none;overflow:hidden" 
+                scrolling="no" 
+                frameborder="0" 
+                allowfullscreen="true" 
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" 
+                allowFullScreen="true"></iframe>
+        <div class="video-overlay"></div> <!-- Transparent overlay to block interactions -->
+    </div>
+    <script>
+        function updateDateTime() {
+            const datetimeElement = document.getElementById('datetime');
+            const now = new Date();
+            const optionsDate = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                timeZone: 'America/New_York' 
+            };
+            const optionsTime = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                timeZone: 'America/New_York' 
+            };
+            const dateString = now.toLocaleDateString('en-US', optionsDate);
+            const timeString = now.toLocaleTimeString('en-US', optionsTime).replace(/ AM| PM/, ''); // Remove AM/PM
+            datetimeElement.innerHTML = `${dateString} <span style="margin-left: 5px;">${timeString} EST</span>`;
+        }
+
+        function updateTimeDateText() {
+            const timeDateTextElement = document.getElementById('time-date-text');
+            const now = new Date();
+            const optionsDate = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                timeZone: 'America/New_York' 
+            };
+            const optionsTime = { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                timeZone: 'America/New_York' 
+            };
+            const dateString = now.toLocaleDateString('en-US', optionsDate);
+            const timeString = now.toLocaleTimeString('en-US', optionsTime).replace(/ AM| PM/, ''); // Remove AM/PM
+            timeDateTextElement.innerHTML = `${dateString} <br>${timeString}`;
+        }
+
+        document.getElementById('datetime').addEventListener('click', () => {
+            const timeDateTextElement = document.getElementById('time-date-text');
+            if (timeDateTextElement.style.display === 'block') {
+                timeDateTextElement.style.animation = 'fadeOut 1s forwards';
+                setTimeout(() => {
+                    timeDateTextElement.style.display = 'none';
+                }, 1000); // Match fade-out duration
+            } else {
+                updateTimeDateText();
+                timeDateTextElement.style.display = 'block';
+                timeDateTextElement.style.animation = 'fadeIn 
